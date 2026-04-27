@@ -1,0 +1,113 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+
+N = 100
+L = 10.0
+v0 = 3.0
+dt = 0.01
+Dr = 0.05
+noise = 0.05
+steps = 2000
+
+obs_list = [0, 20, 50, 100]
+obs_radius = 0.8
+
+# Simulation function
+
+def simulate_msd(num_obs):
+
+    positions = np.random.rand(N, 2) * L
+    theta = np.random.rand(N) * 2 * np.pi
+    obstacles = np.random.rand(num_obs, 2) * L
+
+    traj = np.zeros((steps, N, 2))
+
+    # simulation
+    for t in range(steps):
+
+        # orientation update
+        theta += np.sqrt(2 * Dr * dt) * np.random.randn(N)
+
+        directions = np.column_stack((np.cos(theta), np.sin(theta)))
+
+        new_positions = positions + v0 * directions * dt
+        new_positions += noise * np.sqrt(dt) * np.random.randn(N, 2)
+
+        # obstacle collision
+        for i in range(N):
+            for obs in obstacles:
+                if np.linalg.norm(new_positions[i] - obs) < obs_radius:
+                    new_positions[i] = positions[i]
+                    theta[i] += np.pi/2 * (np.random.rand() - 0.5)
+
+        # periodic boundaries
+        new_positions %= L
+        positions = new_positions
+
+        traj[t] = positions
+
+    
+    unwrapped = np.zeros_like(traj)
+    unwrapped[0] = traj[0]
+
+    for t in range(1, steps):
+        delta = traj[t] - traj[t-1]
+
+        # correct periodic jumps
+        delta[delta > L/2] -= L
+        delta[delta < -L/2] += L
+
+        unwrapped[t] = unwrapped[t-1] + delta
+
+   
+    # Compute MSD
+   
+    msd = np.zeros(steps)
+
+    for t in range(steps):
+        disp = unwrapped[t] - unwrapped[0]
+        msd[t] = np.mean(np.sum(disp**2, axis=1))
+
+    return msd
+
+# Run simulations
+
+time = np.arange(steps) * dt
+
+plt.figure()
+
+for num_obs in obs_list:
+    print(f"\nRunning for obs = {num_obs}")
+
+    msd = simulate_msd(num_obs)
+
+    # avoid log(0)
+    valid = time > 0
+
+    plt.loglog(time[valid], msd[valid], label=f"obs = {num_obs}")
+
+    # Slope estimation (better region)
+    start = int(0.3 * steps)
+    end = int(0.8 * steps)
+
+    t_fit = time[start:end]
+    msd_fit = msd[start:end]
+
+    log_t = np.log(t_fit)
+    log_msd = np.log(msd_fit)
+
+    slope, _ = np.polyfit(log_t, log_msd, 1)
+
+    print(f"alpha (obs={num_obs}) ≈ {slope:.2f}")
+
+# Plot
+
+plt.xlabel("Time")
+plt.ylabel("MSD")
+plt.title("Log-Log MSD: Transport vs Confinement")
+plt.legend()
+plt.grid()
+
+plt.show()
