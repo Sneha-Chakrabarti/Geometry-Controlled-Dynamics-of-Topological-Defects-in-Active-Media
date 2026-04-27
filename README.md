@@ -74,3 +74,14 @@ where:
 ---
 
 ## Repository Structure
+```
+project/
+├── README.md
+├── src/
+│   ├── field_model.py
+│   ├── defect_detection.py
+│   └── particle_model.py
+├── simulations/
+├── results/
+└── plots/
+```
