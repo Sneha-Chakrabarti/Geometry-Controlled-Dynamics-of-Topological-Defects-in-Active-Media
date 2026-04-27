@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Apr 27 19:58:56 2026
+Created on Mon Apr 27 19:47:12 2026
 
 @author: chakr
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import os
-os.makedirs("plots", exist_ok=True)
 
 # Parameters
 
-N = 100
-K = 1.0
-dt = 0.01
+N = 100              # grid size
+K = 1.0              # elastic constant
+dt = 0.01            # time step
+steps = 500          # number of iterations
 noise_strength = 0.1
-steps = 300
 
-# We Initialize field
+# Initialize field
+
 theta = np.random.rand(N, N) * 2 * np.pi
 
-# We define the Laplacian
+# Laplacian (finite difference)
+
 def laplacian(field):
     return (
         np.roll(field, 1, axis=0) +
@@ -32,35 +31,23 @@ def laplacian(field):
         4 * field
     )
 
-# Updating field
-def update_field():
-    global theta
+# Time evolution
+
+def update(theta):
     noise = noise_strength * np.random.randn(N, N)
     dtheta = K * laplacian(theta) + noise
-    theta = theta + dt * dtheta
-# Plot setup
-fig, ax = plt.subplots()
-im = ax.imshow(theta, cmap='hsv', vmin=0, vmax=2*np.pi,animated=True)
-plt.colorbar(im)
+    return theta + dt * dtheta
 
-# Animation update
-def update(frame):
-    update_field()
-    im.set_array(theta)
-    ax.set_title(f"Step {frame}")
-    return [im]
-ani = animation.FuncAnimation(
-    fig,
-    update,
-    frames=steps,
-    interval=50,
-    blit=True
-)
+# Simulation loop
 
-html_path = html_path = r"C:\Users\chakr\Desktop\field_evolution.html"
-with open(html_path, "w") as f:
-    f.write(ani.to_jshtml())
+for step in range(steps):
+    theta = update(theta)
 
-print(f"HTML animation saved at {html_path}")
+    if step % 100 == 0:
+        plt.clf()
+        plt.imshow(theta, cmap='hsv')
+        plt.colorbar()
+        plt.title(f"Step {step}")
+        plt.pause(0.01)
 
-plt.close()
+plt.show()
