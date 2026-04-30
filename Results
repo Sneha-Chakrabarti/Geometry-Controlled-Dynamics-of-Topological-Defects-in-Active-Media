@@ -1,0 +1,30 @@
+RESULTS
+
+1. Active Brownian Dynamics
+The particle-based simulations reproduce the expected qualitative behavior of active Brownian particles:
+- Short-time ballistic motion (MSD ~ t^2)
+- Crossover to diffusive behavior at longer times
+
+2. Effect of Obstacles on Transport
+Introducing static obstacles leads to:
+- Reduction in particle mobility
+- Slower growth of mean squared displacement (MSD)
+- Increasing deviation from free diffusion with obstacle density
+
+3. Evidence of Hindered Transport
+At higher obstacle densities:
+- MSD curves show reduced slope in log-log plots
+- Indications of subdiffusive behavior (MSD ~ t^alpha, alpha < 1) are observed
+
+4. Role of Persistence
+For the chosen parameters (large persistence length compared to system size):
+- Particle motion is strongly affected by collisions with obstacles
+- Persistent motion enhances interaction with confinement
+
+5. Geometry-Dependent Dynamics
+The simulations indicate that geometric constraints alone:
+- Significantly influence transport properties
+- Can lead to transitions from near-free motion to hindered dynamics
+
+NOTE:
+Some observations (e.g., trapping, intermittency, and scaling exponents) require further statistical averaging and analysis for quantitative confirmation.
